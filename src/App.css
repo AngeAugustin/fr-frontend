@@ -1,0 +1,17 @@
+/* App global styles (minimal, for auth page) */
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/proxima-nova-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body, #root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #f7f7f7;
+  font-family: 'Proxima Nova', Arial, Helvetica, sans-serif;
+  color: #222;
+}
