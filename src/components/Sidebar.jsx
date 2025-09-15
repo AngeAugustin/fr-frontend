@@ -1,13 +1,15 @@
 
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 import logo from '../assets/A.png';
 import { logout } from '../api/auth';
-import { FaFileAlt, FaHistory, FaUserCircle } from 'react-icons/fa';
-
+import { FaFileAlt, FaHistory, FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { useSidebar } from '../contexts/SidebarContext';
 
 const Sidebar = () => {
-  const [showLogout, setShowLogout] = React.useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   // Récupérer les infos utilisateur depuis localStorage
@@ -19,32 +21,39 @@ const Sidebar = () => {
     avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username || 'Utilisateur')}&background=007bff&color=fff`,
   };
 
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
-        <img src={logo} alt="Logo" className="sidebar-logo" />
+        <button className="sidebar-toggle" onClick={toggleSidebar} title={isCollapsed ? 'Développer le menu' : 'Réduire le menu'}>
+          <span className="toggle-icon">
+            {isCollapsed ? <FaBars size={16} /> : <FaTimes size={16} />}
+          </span>
+        </button>
+        {!isCollapsed && <img src={logo} alt="Logo" className="sidebar-logo" />}
+        {isCollapsed && <img src={logo} alt="Logo" className="sidebar-logo-mini" />}
       </div>
       <nav className="sidebar-nav"> 
         <ul>
           <li className={pathname === '/generate' ? 'active' : ''}>
-            <Link to="/generate">
+            <Link to="/generate" title={isCollapsed ? 'Génération' : ''}>
               <span className="sidebar-icon">
                 <FaFileAlt size={20} />
               </span>
-              Génération
+              {!isCollapsed && <span className="sidebar-text">Génération</span>}
             </Link>
           </li>
           <li className={pathname === '/history' ? 'active' : ''}>
-            <Link to="/history">
+            <Link to="/history" title={isCollapsed ? 'Historique' : ''}>
               <span className="sidebar-icon">
                 <FaHistory size={20} />
               </span>
-              Historique
+              {!isCollapsed && <span className="sidebar-text">Historique</span>}
             </Link>
           </li>
         </ul>
@@ -52,18 +61,20 @@ const Sidebar = () => {
       <div className="sidebar-footer">
         <div
           className="sidebar-user"
-          style={{display: 'flex', flexDirection: 'row', alignItems: 'center', cursor: 'pointer'}}
           onClick={() => setShowLogout(v => !v)}
+          title={isCollapsed ? `${user.name} - ${user.email}` : ''}
         >
-          <FaUserCircle size={36} className="sidebar-avatar" style={{marginRight: 8, color: '#1800ad'}} />
-          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-            <span className="sidebar-username" style={{fontWeight: 'bold', marginBottom: 0}}>{user.name}</span>
-            {user.email && (
-              <span className="sidebar-email" style={{ fontSize: '0.9em', color: '#555', marginTop: 0 }}>{user.email}</span>
-            )}
-          </div>
+          <FaUserCircle size={36} className="sidebar-avatar" />
+          {!isCollapsed && (
+            <div className="sidebar-user-info">
+              <span className="sidebar-username">{user.name}</span>
+              {user.email && (
+                <span className="sidebar-email">{user.email}</span>
+              )}
+            </div>
+          )}
         </div>
-        {showLogout && (
+        {showLogout && !isCollapsed && (
           <button className="sidebar-logout" onClick={handleLogout}>Déconnexion</button>
         )}
       </div>
@@ -72,4 +83,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-import React from 'react';

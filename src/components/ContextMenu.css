@@ -12,15 +12,16 @@
 }
 .context-menu {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 32px 24px 24px 24px;
-  min-width: 320px;
+  padding: 20px;
+  width: 1200px;
   max-width: 90vw;
+  max-height: 80vh;
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  overflow-y: auto;
 }
 .context-menu-close {
   position: absolute;
