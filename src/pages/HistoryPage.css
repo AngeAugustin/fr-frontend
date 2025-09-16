@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 /* En-tête des résultats */
 .results-header {
   margin-bottom: 24px;
@@ -471,7 +473,6 @@
   color: #3a3a4d;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 .history-row-hover td,
 .history-row-active td {
   background: #eef1f7 !important;
