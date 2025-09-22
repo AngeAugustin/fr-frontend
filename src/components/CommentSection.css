@@ -1,0 +1,289 @@
+.comment-section {
+  background: #f8f9fa;
+  border: 1px solid #e3e7ed;
+  border-radius: 8px;
+  margin-top: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.comment-section:hover {
+  border-color: #d0d4e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e3e7ed;
+}
+
+.comment-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.comment-title svg {
+  color: #1800ad;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e3e7ed;
+  border-radius: 6px;
+  background: #fff;
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.comment-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #d0d4e0;
+  color: #333;
+}
+
+.comment-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-btn:hover:not(:disabled) {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #d32f2f;
+}
+
+.save-btn {
+  background: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #218838;
+  border-color: #1e7e34;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #5a6268;
+  border-color: #545b62;
+}
+
+.comment-content {
+  padding: 16px;
+}
+
+.comment-display {
+  min-height: 60px;
+}
+
+.comment-text {
+  background: #fff;
+  border: 1px solid #e3e7ed;
+  border-radius: 6px;
+  padding: 12px;
+  line-height: 1.5;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.comment-placeholder {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+}
+
+.comment-placeholder svg {
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.comment-placeholder p {
+  margin: 8px 0 16px 0;
+  font-size: 14px;
+}
+
+.add-comment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #1800ad;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-comment-btn:hover {
+  background: #1400a0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 0, 173, 0.3);
+}
+
+.comment-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid #e3e7ed;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #1800ad;
+  box-shadow: 0 0 0 3px rgba(24, 0, 173, 0.1);
+}
+
+.comment-textarea:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.comment-edit-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.comment-char-count {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.comment-char-count.warning {
+  color: #ff9800;
+}
+
+.comment-char-count.danger {
+  color: #f44336;
+}
+
+.comment-edit-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-help {
+  text-align: center;
+  color: #6c757d;
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .comment-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .comment-edit-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .comment-edit-buttons {
+    justify-content: center;
+  }
+  
+  .comment-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Animation pour les changements d'état */
+.comment-section {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style pour les commentaires longs */
+.comment-text {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.comment-text::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comment-text::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.comment-text::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.comment-text::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

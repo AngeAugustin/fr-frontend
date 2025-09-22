@@ -2,16 +2,16 @@
 
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Sidebar from '../components/Sidebar';
-import MainContent from '../components/MainContent';
-import { FaHistory, FaFileAlt, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaChevronDown, FaChevronUp, FaTable, FaFileExcel } from 'react-icons/fa';
+import Header from '../components/Header';
+import { FaHistory, FaFileAlt, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaTable } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
 import './HistoryPage.css';
-import ContextMenu from '../components/ContextMenu';
 
 const HistoryPage = () => {
+  const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,8 +29,6 @@ const HistoryPage = () => {
   const [uploadDate, setUploadDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [searchText, setSearchText] = useState('');
-  const [openMenuId, setOpenMenuId] = useState(null);
-  const [expandedFiles, setExpandedFiles] = useState({});
   const [viewMode, setViewMode] = useState('table'); // 'table' ou 'cards'
 
   // Fonction pour compter les résultats filtrés
@@ -181,7 +179,7 @@ const HistoryPage = () => {
             
             <button
               className="view-details-btn"
-              onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+              onClick={() => viewReportDetails(item.id)}
               title="Voir les détails"
             >
               <FaEye size={16} />
@@ -295,295 +293,16 @@ const HistoryPage = () => {
     }
   };
 
-  // Fonction pour basculer l'état d'expansion d'un fichier
-  const toggleFileExpansion = (fileKey) => {
-    setExpandedFiles(prev => ({
-      ...prev,
-      [fileKey]: !prev[fileKey]
-    }));
+  // Fonction pour naviguer vers la page de détails
+  const viewReportDetails = (reportId) => {
+    navigate(`/details/${reportId}`);
   };
 
-  // Fonction pour rendre le TFT comme un tableau Excel
-  const renderTFTAsTable = (data, title) => {
-    if (!data || typeof data !== 'object') return null;
-    
-    const entries = Object.entries(data);
-    if (entries.length === 0) return <p>Aucune donnée disponible</p>;
-
-    // Collecter toutes les propriétés uniques pour créer les colonnes
-    const allProperties = new Set();
-    entries.forEach(([_, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        Object.keys(value).forEach(key => allProperties.add(key));
-      }
-    });
-    
-    const properties = Array.from(allProperties);
-
-    return (
-      <div style={{ marginTop: 16 }}>
-        <h4 style={{ margin: '0 0 12px 0', color: '#333', fontSize: 16 }}>{title}</h4>
-        <div style={{ overflowX: 'auto', border: '1px solid #e3e7ed', borderRadius: 4 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-            <thead style={{ background: '#f0f8ff' }}>
-              <tr>
-                <th style={{ 
-                  padding: '8px 6px', 
-                  textAlign: 'center', 
-                  borderBottom: '2px solid #1800ad', 
-                  fontWeight: 700,
-                  background: '#e6f3ff',
-                  color: '#1800ad',
-                  fontSize: 12
-                }}>
-                  Code
-                </th>
-                {properties.map(prop => (
-                  <th key={prop} style={{ 
-                    padding: '8px 6px', 
-                    textAlign: 'center', 
-                    borderBottom: '2px solid #1800ad', 
-                    fontWeight: 700,
-                    background: '#e6f3ff',
-                    color: '#1800ad',
-                    fontSize: 12,
-                    textTransform: 'capitalize'
-                  }}>
-                    {prop.replace(/_/g, ' ')}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map(([code, value], index) => (
-                <tr key={code} style={{ 
-                  borderBottom: '1px solid #e3e7ed',
-                  background: index % 2 === 0 ? '#fff' : '#fafafa'
-                }}>
-                  <td style={{ 
-                    padding: '8px 6px', 
-                    fontWeight: 700, 
-                    color: '#1800ad',
-                    textAlign: 'center',
-                    background: '#f8f9fa',
-                    borderRight: '1px solid #e3e7ed'
-                  }}>
-                    {code}
-                  </td>
-                  {properties.map(prop => (
-                    <td key={prop} style={{ 
-                      padding: '8px 6px', 
-                      textAlign: prop === 'montant' || prop === 'amount' ? 'right' : 'left',
-                      fontWeight: prop === 'montant' || prop === 'amount' ? 600 : 'normal'
-                    }}>
-                      {(() => {
-                        const cellValue = value[prop];
-                        
-                        // Format spécial pour la colonne "Comptes" (array d'objets)
-                        if (prop === 'comptes' && Array.isArray(cellValue) && cellValue.length > 0) {
-                          return (
-                            <div style={{ fontSize: '11px' }}>
-                              <div 
-                                style={{ 
-                                  cursor: 'pointer', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  gap: '4px',
-                                  fontWeight: 600,
-                                  color: '#1800ad'
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const accordionId = `comptes_${code}_${prop}`;
-                                  const accordion = document.getElementById(accordionId);
-                                  if (accordion) {
-                                    accordion.style.display = accordion.style.display === 'none' ? 'block' : 'none';
-                                  }
-                                }}
-                              >
-                                📋 Comptes ({cellValue.length}) ▼
-                              </div>
-                              <div 
-                                id={`comptes_${code}_${prop}`}
-                                style={{ 
-                                  display: 'none', 
-                                  marginTop: '8px', 
-                                  padding: '8px', 
-                                  background: '#f8f9fa', 
-                                  borderRadius: '4px',
-                                  border: '1px solid #e3e7ed'
-                                }}
-                              >
-                                {cellValue.map((compte, index) => (
-                                  <div key={compte.id || index} style={{ 
-                                    marginBottom: index < cellValue.length - 1 ? '6px' : '0',
-                                    paddingBottom: index < cellValue.length - 1 ? '6px' : '0',
-                                    borderBottom: index < cellValue.length - 1 ? '1px solid #e0e0e0' : 'none'
-                                  }}>
-                                    <div style={{ fontWeight: 600, color: '#333', fontSize: '10px' }}>
-                                      {compte.account_number} - {compte.account_label}
-                                    </div>
-                                    <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>
-                                      Solde: <span style={{ 
-                                        fontWeight: 600, 
-                                        color: compte.balance >= 0 ? '#28a745' : '#dc3545' 
-                                      }}>
-                                        {new Intl.NumberFormat('fr-FR', { 
-                                          style: 'currency', 
-                                          currency: 'XOF',
-                                          minimumFractionDigits: 0 
-                                        }).format(compte.balance)}
-                                      </span>
-                                      {compte.entries_count && (
-                                        <span style={{ marginLeft: '8px' }}>
-                                          | Écritures: {compte.entries_count}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Vérifier si la valeur est un objet complexe
-                        if (typeof cellValue === 'object' && cellValue !== null) {
-                          return JSON.stringify(cellValue);
-                        }
-                        
-                        if (prop === 'montant' || prop === 'amount') {
-                          return cellValue !== undefined && cellValue !== null ? 
-                            new Intl.NumberFormat('fr-FR', { 
-                              style: 'currency', 
-                              currency: 'XOF',
-                              minimumFractionDigits: 0 
-                            }).format(cellValue) : 
-                            '-';
-                        }
-                        
-                        return String(cellValue || '-');
-                      })()}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // Fonction pour rendre une seule feuille maîtresse
-  const renderSingleFeuilleMaitresse = (groupName, groupData) => {
-    // Colonnes Excel selon l'image fournie
-    const excelColumns = [
-      { key: 'id', label: 'ID', width: '60px' },
-      { key: 'account_number', label: 'Numéro Compte', width: '120px' },
-      { key: 'account_label', label: 'Libellé Compte', width: '200px' },
-      { key: 'account_class', label: 'Classe Compte', width: '120px' },
-      { key: 'balance', label: 'Solde', width: '120px', align: 'right', format: 'currency' },
-      { key: 'total_debit', label: 'Total Débit', width: '120px', align: 'right', format: 'currency' },
-      { key: 'total_credit', label: 'Total Crédit', width: '120px', align: 'right', format: 'currency' },
-      { key: 'entries_count', label: 'Nb Écritures', width: '100px', align: 'right' },
-      { key: 'created_at', label: 'Date Création', width: '120px' },
-      { key: 'financial_report_id', label: 'ID Rapport', width: '100px' },
-      { key: 'account_lookup_key', label: 'Clé Recherche', width: '120px' },
-      { key: 'exercice', label: 'Exercice', width: '100px' }
-    ];
-
-    // Vérifier si groupData contient des comptes détaillés dans comptes_n
-    const hasDetailedAccounts = groupData && typeof groupData === 'object' && (
-      groupData.comptes_n && Array.isArray(groupData.comptes_n) && groupData.comptes_n.length > 0
-    );
-
-    let accountsData;
-    
-    if (hasDetailedAccounts) {
-      // Utiliser les comptes détaillés du tableau comptes_n
-      accountsData = groupData.comptes_n;
-    } else {
-      // Fallback - convertir les totaux en format Excel
-      accountsData = [{
-        id: 1,
-        account_number: groupName,
-        account_label: groupName,
-        account_class: 'Groupe',
-        balance: groupData.balance || groupData.solde_n || 0,
-        total_debit: groupData.total_debit || groupData.debit_total || 0,
-        total_credit: groupData.total_credit || groupData.credit_total || 0,
-        entries_count: groupData.entries_count || groupData.nb_ecritures || 0,
-        created_at: groupData.created_at || new Date().toISOString().split('T')[0],
-        financial_report_id: groupData.financial_report_id || '-',
-        account_lookup_key: groupData.account_lookup_key || groupName,
-        exercice: groupData.exercice || new Date().getFullYear()
-      }];
-    }
-
-    return (
-      <div style={{ overflowX: 'auto', border: '1px solid #d0d0d0', borderRadius: 4 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-          <thead style={{ background: '#f0f8ff' }}>
-            <tr>
-              {excelColumns.map(col => (
-                <th key={col.key} style={{ 
-                  padding: '6px 4px', 
-                  textAlign: col.align || 'center', 
-                  borderBottom: '2px solid #1800ad', 
-                  borderRight: '1px solid #d0d0d0',
-                  fontWeight: 700,
-                  background: '#e6f3ff',
-                  color: '#1800ad',
-                  fontSize: 10,
-                  width: col.width,
-                  whiteSpace: 'nowrap'
-                }}>
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {accountsData.map((account, index) => (
-              <tr key={account.id || index} style={{ 
-                borderBottom: '1px solid #e0e0e0',
-                background: index % 2 === 0 ? '#fff' : '#fafafa'
-              }}>
-                {excelColumns.map(col => (
-                  <td key={col.key} style={{ 
-                    padding: '6px 4px', 
-                    textAlign: col.align || 'left',
-                    borderRight: '1px solid #e0e0e0',
-                    fontSize: 10,
-                    fontWeight: col.format === 'currency' ? 600 : 'normal',
-                    color: col.format === 'currency' ? '#1800ad' : '#333'
-                  }}>
-                    {col.format === 'currency' ? (
-                      account[col.key] !== undefined && account[col.key] !== null ? 
-                        new Intl.NumberFormat('fr-FR', { 
-                          style: 'currency', 
-                          currency: 'XOF',
-                          minimumFractionDigits: 0 
-                        }).format(account[col.key]) : 
-                        '-'
-                    ) : (
-                      String(account[col.key] || '-')
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
 
   return (
-    <div style={{ display: 'flex' }}>
-      <Sidebar />
-      <MainContent>
+    <div className="page-container">
+      <Header />
+      <main className="main-content">
         <ToastContainer position="top-right" autoClose={4000} />
         <h1 className="generate-title">Historique des uploads</h1>
         <p className="generate-subtitle">Consultez l'historique des uploads de fichiers CSV et des rapports générés.</p>
@@ -846,19 +565,7 @@ const HistoryPage = () => {
                     </thead>
                     <tbody>
                       {filteredHistory.map(item => (
-                    <tr
-                      key={item.id}
-                      className={openMenuId === item.id ? 'history-row-active' : ''}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={e => {
-                        if (e.target.closest('.eye-icon')) {
-                          e.currentTarget.classList.add('history-row-hover');
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.classList.remove('history-row-hover');
-                      }}
-                    >
+                    <tr key={item.id}>
                       <td>{item.id}</td>
                       <td>
                         {item.file ? item.file.split('/').pop() : ''}
@@ -884,262 +591,15 @@ const HistoryPage = () => {
                           </span>
                         )}
                       </td>
-                      <td style={{ position: 'relative' }}>
-                        <span
-                          className="eye-icon"
-                          style={{ display: 'inline-block' }}
-                          onMouseEnter={e => {
-                            e.currentTarget.closest('tr').classList.add('history-row-hover');
-                          }}
-                          onMouseLeave={e => {
-                            if (openMenuId !== item.id) {
-                              e.currentTarget.closest('tr').classList.remove('history-row-hover');
-                            }
-                          }}
+                      <td>
+                        <button
+                          className="view-details-btn"
+                          onClick={() => viewReportDetails(item.id)}
+                          title="Voir les détails"
                         >
-                          <button
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              padding: 0,
-                              outline: 'none',
-                            }}
-                            title="Voir les fichiers générés"
-                            onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-                          >
-                            <FaEye size={22} color="#4f6af7" />
-                          </button>
-                        </span>
-                        {openMenuId === item.id && (
-                          <ContextMenu open={true} onClose={() => setOpenMenuId(null)}>
-                            <div style={{ fontWeight: 600, marginBottom: 16, color: '#3a3a4d', fontSize: 18 }}>Détails du rapport #{item.id}</div>
-                            
-                            {/* Contrôle de cohérence - Affichage en cartes */}
-                            {item.coherence && (
-                              <div style={{ marginBottom: 16 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', background: item.coherence.is_coherent ? '#28a745' : '#dc3545', marginRight: 8 }}>
-                                    <FaCheckCircle size={14} color="#fff" />
-                                  </span>
-                                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#333' }}>Contrôle de cohérence</h3>
-                                </div>
-                                
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8 }}>
-                                  <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                                    <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Variation TFT</h4>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: '#1800ad' }}>
-                                      {new Intl.NumberFormat('fr-FR', { 
-                                        style: 'currency', 
-                                        currency: 'XOF',
-                                        minimumFractionDigits: 0 
-                                      }).format(item.coherence.variation_tft || 0)}
-                                    </div>
-                                  </div>
-                                  
-                                  <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                                    <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Variation Trésorerie</h4>
-                                    <div style={{ fontSize: 14, fontWeight: 700, color: '#1800ad' }}>
-                                      {new Intl.NumberFormat('fr-FR', { 
-                                        style: 'currency', 
-                                        currency: 'XOF',
-                                        minimumFractionDigits: 0 
-                                      }).format(item.coherence.variation_treso || 0)}
-                                    </div>
-                                  </div>
-                                  
-                                  <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                                    <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Statut</h4>
-                                    <div style={{ 
-                                      fontSize: 12, 
-                                      fontWeight: 600, 
-                                      color: item.coherence.is_coherent ? '#28a745' : '#dc3545',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: 4
-                                    }}>
-                                      <FaCheckCircle size={10} />
-                                      {item.coherence.is_coherent ? 'Cohérent' : 'Non cohérent'}
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                {item.coherence.details && Object.keys(item.coherence.details).length > 0 && (
-                                  <div style={{ marginTop: 12 }}>
-                                    <h4 style={{ margin: '0 0 8px 0', color: '#333', fontSize: 12 }}>Détails du contrôle</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 6 }}>
-                                      {Object.entries(item.coherence.details).map(([key, value]) => (
-                                        <div key={key} style={{ 
-                                          background: '#f8f9fa', 
-                                          borderRadius: 4, 
-                                          padding: 8, 
-                                          border: '1px solid #e3e7ed',
-                                          borderLeft: '3px solid #1800ad'
-                                        }}>
-                                          <h5 style={{ 
-                                            margin: '0 0 4px 0', 
-                                            color: '#333', 
-                                            fontSize: 10, 
-                                            fontWeight: 600,
-                                            textTransform: 'capitalize'
-                                          }}>
-                                            {key.replace(/_/g, ' ')}
-                                          </h5>
-                                          <div style={{ 
-                                            fontSize: 10, 
-                                            color: '#666',
-                                            wordBreak: 'break-word'
-                                          }}>
-                                            {typeof value === 'object' ? (
-                                              <div>
-                                                {Object.entries(value).map(([subKey, subValue]) => (
-                                                  <div key={subKey} style={{ marginBottom: 1 }}>
-                                                    <strong>{subKey}:</strong> {subValue}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            ) : (
-                                              <span>{value}</span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* TFT JSON */}
-                            {item.tft_json && (
-                              <div style={{ marginBottom: 16 }}>
-                                <div 
-                                  style={{ 
-                                    background: '#f8f9fa', 
-                                    borderRadius: 4, 
-                                    padding: 8, 
-                                    border: '1px solid #e3e7ed',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between'
-                                  }}
-                                  onClick={() => toggleFileExpansion(`tft_${item.id}`)}
-                                >
-                                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <FaFileExcel size={14} color="#1800ad" style={{ marginRight: 6 }} />
-                                    <div>
-                                      <h3 style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#333' }}>Tableau de Flux de Trésorerie (TFT)</h3>
-                                      <p style={{ margin: '1px 0 0 0', fontSize: 10, color: '#666' }}>
-                                        {Object.keys(item.tft_json).length} rubriques
-                                      </p>
-                                    </div>
-                                  </div>
-                                  {expandedFiles[`tft_${item.id}`] ? <FaChevronUp size={12} color="#666" /> : <FaChevronDown size={12} color="#666" />}
-                                </div>
-                                
-                                {expandedFiles[`tft_${item.id}`] && (
-                                  <div style={{ marginTop: 8, padding: 12, background: '#fff', border: '1px solid #e3e7ed', borderRadius: 4 }}>
-                                    {renderTFTAsTable(item.tft_json, 'Données TFT')}
-                                    {item.generated_files?.find(f => f.file_type === 'TFT') && (
-                                      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                                  <button
-                                    style={{
-                                            background: '#28a745', 
-                                      color: '#fff',
-                                      border: 'none',
-                                            borderRadius: 3, 
-                                            padding: '6px 12px', 
-                                      fontWeight: 500,
-                                            fontSize: 11, 
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 4
-                                          }}
-                                          onClick={() => {
-                                            const tftFile = item.generated_files.find(f => f.file_type === 'TFT');
-                                            window.open(tftFile.download_url.startsWith('http') ? tftFile.download_url : `http://127.0.0.1:8000${tftFile.download_url}`, '_blank');
-                                          }}
-                                        >
-                                          <FaDownload size={10} />
-                                          📊 Exporter TFT Excel
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Feuilles maîtresses - Un menu dépliant par groupe */}
-                            {item.feuilles_maitresses_json && Object.entries(item.feuilles_maitresses_json).map(([groupName, groupData]) => {
-                              const hasDetailedAccounts = groupData && typeof groupData === 'object' && (
-                                groupData.comptes_n && Array.isArray(groupData.comptes_n) && groupData.comptes_n.length > 0
-                              );
-                              const accountsCount = hasDetailedAccounts ? groupData.comptes_n.length : 1;
-                              
-                              return (
-                                <div key={groupName} style={{ marginBottom: 12 }}>
-                                  <div 
-                                    style={{ 
-                                      background: '#f8f9fa', 
-                                      borderRadius: 4, 
-                                      padding: 8, 
-                                      border: '1px solid #e3e7ed',
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'space-between'
-                                    }}
-                                    onClick={() => toggleFileExpansion(`feuille_${item.id}_${groupName}`)}
-                                  >
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                      <FaFileExcel size={14} color="#ff9800" style={{ marginRight: 6 }} />
-                                      <div>
-                                        <h3 style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#333' }}>{groupName}</h3>
-                                        <p style={{ margin: '1px 0 0 0', fontSize: 10, color: '#666' }}>
-                                          {accountsCount} compte{accountsCount > 1 ? 's' : ''}
-                                        </p>
-                                      </div>
-                                    </div>
-                                    {expandedFiles[`feuille_${item.id}_${groupName}`] ? <FaChevronUp size={12} color="#666" /> : <FaChevronDown size={12} color="#666" />}
-                                  </div>
-                                  
-                                  {expandedFiles[`feuille_${item.id}_${groupName}`] && (
-                                    <div style={{ marginTop: 8, padding: 12, background: '#fff', border: '1px solid #e3e7ed', borderRadius: 4 }}>
-                                      {renderSingleFeuilleMaitresse(groupName, groupData)}
-                                      <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                        {item.generated_files?.filter(f => f.file_type === 'feuille_maitresse' && f.group_name === groupName).map(file => (
-                                          <button
-                                            key={file.download_url}
-                                            style={{ 
-                                              background: '#ff9800', 
-                                      color: '#fff',
-                                      border: 'none',
-                                              borderRadius: 3, 
-                                              padding: '6px 12px', 
-                                      fontWeight: 500,
-                                              fontSize: 11, 
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                              gap: 4
-                                    }}
-                                            onClick={() => window.open(file.download_url.startsWith('http') ? file.download_url : `http://127.0.0.1:8000${file.download_url}`, '_blank')}
-                                  >
-                                            <FaDownload size={10} />
-                                            📋 Exporter {groupName}
-                                  </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </ContextMenu>
-                        )}
+                          <FaEye size={16} />
+                          Voir détails
+                        </button>
                       </td>
                     </tr>
                       ))}
@@ -1270,201 +730,6 @@ const HistoryPage = () => {
               </>
             )}
             
-            {/* Modal de détails - partagé entre les deux vues */}
-            {openMenuId && (
-              <ContextMenu open={true} onClose={() => setOpenMenuId(null)}>
-                {(() => {
-                  const item = filteredHistory.find(item => item.id === openMenuId);
-                  if (!item) return null;
-                  
-                  return (
-                    <>
-                      <div style={{ fontWeight: 600, marginBottom: 16, color: '#3a3a4d', fontSize: 18 }}>Détails du rapport #{item.id}</div>
-                      
-                      {/* Contrôle de cohérence */}
-                      {item.coherence && (
-                        <div style={{ marginBottom: 16 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: '50%', background: item.coherence.is_coherent ? '#28a745' : '#dc3545', marginRight: 8 }}>
-                              <FaCheckCircle size={14} color="#fff" />
-                            </span>
-                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#333' }}>Contrôle de cohérence</h3>
-                          </div>
-                          
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8 }}>
-                            <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                              <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Variation TFT</h4>
-                              <div style={{ fontSize: 14, fontWeight: 700, color: '#1800ad' }}>
-                                {new Intl.NumberFormat('fr-FR', { 
-                                  style: 'currency', 
-                                  currency: 'XOF',
-                                  minimumFractionDigits: 0 
-                                }).format(item.coherence.variation_tft || 0)}
-                              </div>
-                            </div>
-                            
-                            <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                              <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Variation Trésorerie</h4>
-                              <div style={{ fontSize: 14, fontWeight: 700, color: '#1800ad' }}>
-                                {new Intl.NumberFormat('fr-FR', { 
-                                  style: 'currency', 
-                                  currency: 'XOF',
-                                  minimumFractionDigits: 0 
-                                }).format(item.coherence.variation_treso || 0)}
-                              </div>
-                            </div>
-                            
-                            <div style={{ background: '#f8f9fa', borderRadius: 4, padding: 8, border: '1px solid #e3e7ed' }}>
-                              <h4 style={{ margin: '0 0 4px 0', color: '#333', fontSize: 11, fontWeight: 600 }}>Statut</h4>
-                              <div style={{ 
-                                fontSize: 12, 
-                                fontWeight: 600, 
-                                color: item.coherence.is_coherent ? '#28a745' : '#dc3545',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 4
-                              }}>
-                                <FaCheckCircle size={10} />
-                                {item.coherence.is_coherent ? 'Cohérent' : 'Non cohérent'}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* TFT JSON */}
-                      {item.tft_json && (
-                        <div style={{ marginBottom: 16 }}>
-                          <div 
-                            style={{ 
-                              background: '#f8f9fa', 
-                              borderRadius: 4, 
-                              padding: 8, 
-                              border: '1px solid #e3e7ed',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between'
-                            }}
-                            onClick={() => toggleFileExpansion(`tft_${item.id}`)}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <FaFileExcel size={14} color="#1800ad" style={{ marginRight: 6 }} />
-                              <div>
-                                <h3 style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#333' }}>Tableau de Flux de Trésorerie (TFT)</h3>
-                                <p style={{ margin: '1px 0 0 0', fontSize: 10, color: '#666' }}>
-                                  {Object.keys(item.tft_json).length} rubriques
-                                </p>
-                              </div>
-                            </div>
-                            {expandedFiles[`tft_${item.id}`] ? <FaChevronUp size={12} color="#666" /> : <FaChevronDown size={12} color="#666" />}
-                          </div>
-                          
-                          {expandedFiles[`tft_${item.id}`] && (
-                            <div style={{ marginTop: 8, padding: 12, background: '#fff', border: '1px solid #e3e7ed', borderRadius: 4 }}>
-                              {renderTFTAsTable(item.tft_json, 'Données TFT')}
-                              {item.generated_files?.find(f => f.file_type === 'TFT') && (
-                                <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                                  <button
-                                    style={{
-                                      background: '#28a745', 
-                                      color: '#fff',
-                                      border: 'none',
-                                      borderRadius: 3, 
-                                      padding: '6px 12px', 
-                                      fontWeight: 500,
-                                      fontSize: 11, 
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      gap: 4
-                                    }}
-                                    onClick={() => {
-                                      const tftFile = item.generated_files.find(f => f.file_type === 'TFT');
-                                      window.open(tftFile.download_url.startsWith('http') ? tftFile.download_url : `http://127.0.0.1:8000${tftFile.download_url}`, '_blank');
-                                    }}
-                                  >
-                                    <FaDownload size={10} />
-                                    📊 Exporter TFT Excel
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Feuilles maîtresses */}
-                      {item.feuilles_maitresses_json && Object.entries(item.feuilles_maitresses_json).map(([groupName, groupData]) => {
-                        const hasDetailedAccounts = groupData && typeof groupData === 'object' && (
-                          groupData.comptes_n && Array.isArray(groupData.comptes_n) && groupData.comptes_n.length > 0
-                        );
-                        const accountsCount = hasDetailedAccounts ? groupData.comptes_n.length : 1;
-                        
-                        return (
-                          <div key={groupName} style={{ marginBottom: 12 }}>
-                            <div 
-                              style={{ 
-                                background: '#f8f9fa', 
-                                borderRadius: 4, 
-                                padding: 8, 
-                                border: '1px solid #e3e7ed',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between'
-                              }}
-                              onClick={() => toggleFileExpansion(`feuille_${item.id}_${groupName}`)}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <FaFileExcel size={14} color="#ff9800" style={{ marginRight: 6 }} />
-                                <div>
-                                  <h3 style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#333' }}>{groupName}</h3>
-                                  <p style={{ margin: '1px 0 0 0', fontSize: 10, color: '#666' }}>
-                                    {accountsCount} compte{accountsCount > 1 ? 's' : ''}
-                                  </p>
-                                </div>
-                              </div>
-                              {expandedFiles[`feuille_${item.id}_${groupName}`] ? <FaChevronUp size={12} color="#666" /> : <FaChevronDown size={12} color="#666" />}
-                            </div>
-                            
-                            {expandedFiles[`feuille_${item.id}_${groupName}`] && (
-                              <div style={{ marginTop: 8, padding: 12, background: '#fff', border: '1px solid #e3e7ed', borderRadius: 4 }}>
-                                {renderSingleFeuilleMaitresse(groupName, groupData)}
-                                <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                  {item.generated_files?.filter(f => f.file_type === 'feuille_maitresse' && f.group_name === groupName).map(file => (
-                                    <button
-                                      key={file.download_url}
-                                      style={{ 
-                                        background: '#ff9800', 
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: 3, 
-                                        padding: '6px 12px', 
-                                        fontWeight: 500,
-                                        fontSize: 11, 
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 4
-                                      }}
-                                      onClick={() => window.open(file.download_url.startsWith('http') ? file.download_url : `http://127.0.0.1:8000${file.download_url}`, '_blank')}
-                                    >
-                                      <FaDownload size={10} />
-                                      📋 Exporter {groupName}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </>
-                  );
-                })()}
-              </ContextMenu>
-            )}
           </div>
         )}
 
@@ -1481,7 +746,7 @@ const HistoryPage = () => {
           Le système traite automatiquement votre balance générale et génère un TFT complet avec toutes les rubriques SYSCOHADA. Les contrôles de cohérence sont effectués automatiquement et les fichiers d'export sont disponibles immédiatement.
         </div>
       </section>
-      </MainContent>
+      </main>
     </div>
   );
 };

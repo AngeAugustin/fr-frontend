@@ -1,0 +1,286 @@
+.feuille-maitresse-container {
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.feuille-maitresse-tabs {
+  margin-bottom: 0;
+}
+
+.tab-content {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e3e7ed;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.table-container {
+  width: 100%;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f8ff;
+}
+
+.table-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1800ad;
+}
+
+.table-info {
+  background: #e6f3ff;
+  color: #1800ad;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e3e7ed;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.feuille-maitresse-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 800px;
+}
+
+.table-header-cell {
+  background: #f0f8ff;
+  color: #1800ad;
+  font-weight: 700;
+  padding: 12px 8px;
+  text-align: center;
+  border-bottom: 2px solid #1800ad;
+  border-right: 1px solid #e3e7ed;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-header-cell:last-child {
+  border-right: none;
+}
+
+.table-header-cell.left {
+  text-align: left;
+}
+
+.table-header-cell.right {
+  text-align: right;
+}
+
+.table-header-cell.center {
+  text-align: center;
+}
+
+.table-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:hover {
+  background-color: #f8f9fa;
+}
+
+.table-row:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.table-row:nth-child(even):hover {
+  background-color: #f0f0f0;
+}
+
+.table-cell {
+  padding: 10px 8px;
+  border-right: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.table-cell:last-child {
+  border-right: none;
+}
+
+.table-cell.left {
+  text-align: left;
+}
+
+.table-cell.right {
+  text-align: right;
+}
+
+.table-cell.center {
+  text-align: center;
+}
+
+/* Formatage des valeurs */
+.currency-value {
+  font-weight: 600;
+  color: #1800ad;
+  font-family: 'Courier New', monospace;
+}
+
+.variation-value {
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.variation-value.positive {
+  color: #28a745;
+  background-color: #d4edda;
+}
+
+.variation-value.negative {
+  color: #dc3545;
+  background-color: #f8d7da;
+}
+
+.percentage-value {
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.percentage-value.positive {
+  color: #28a745;
+  background-color: #d4edda;
+}
+
+.percentage-value.negative {
+  color: #dc3545;
+  background-color: #f8d7da;
+}
+
+.centered-value {
+  font-weight: 500;
+  color: #495057;
+}
+
+.text-value {
+  color: #333;
+}
+
+.missing-value {
+  color: #6c757d;
+  font-style: italic;
+  background-color: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+/* Messages d'état */
+.no-data-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.no-data-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.no-data-message p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tab-content {
+    padding: 16px;
+  }
+  
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .table-title {
+    font-size: 16px;
+  }
+  
+  .table-info {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .feuille-maitresse-table {
+    font-size: 12px;
+    min-width: 600px;
+  }
+  
+  .table-header-cell,
+  .table-cell {
+    padding: 8px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .feuille-maitresse-table {
+    min-width: 500px;
+  }
+  
+  .table-header-cell,
+  .table-cell {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  .currency-value,
+  .variation-value,
+  .percentage-value {
+    font-size: 10px;
+  }
+}
+
+/* Animation pour les changements de données */
+.table-row {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style pour les comptes manquants */
+.table-row.missing-account {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.table-row.missing-account .missing-value {
+  background-color: #ffeaa7;
+  color: #856404;
+  font-weight: 600;
+}

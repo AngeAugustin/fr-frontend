@@ -381,29 +381,32 @@
 
 /* Filtres style moderne */
 .history-filters {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  background: #eef1f7;
-  padding: 18px 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(60,60,100,0.07);
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  align-items: end;
+  border: 1px solid #e9ecef;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  min-width: 180px;
-  flex: 1 1 180px;
+  min-width: 0; /* Permet au contenu de se rétrécir */
+  width: 100%;
 }
 
 .filter-label {
-  font-weight: 500;
-  margin-bottom: 6px;
-  color: #3a3a4d;
-  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #495057;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filter-input-wrapper {
@@ -411,12 +414,13 @@
   align-items: center;
   background: #fff;
   border: 1px solid #d0d4e0;
-  border-radius: 8px;
-  padding: 0 10px;
+  border-radius: 6px;
+  padding: 0 12px;
   box-sizing: border-box;
   height: 40px;
   transition: all 0.2s ease;
   position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .filter-input-wrapper:focus-within {
@@ -834,6 +838,13 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .history-filters {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+}
+
 @media (max-width: 900px) {
   .history-container {
     margin-left: 0;
@@ -884,13 +895,14 @@
   }
   
   .history-filters {
+    grid-template-columns: 1fr;
     gap: 16px;
-    padding: 16px 12px;
+    padding: 16px;
   }
   
   .filter-group {
-    min-width: 150px;
-    flex: 1 1 150px;
+    min-width: 0;
+    width: 100%;
   }
   
   /* Responsive pour les cartes */
