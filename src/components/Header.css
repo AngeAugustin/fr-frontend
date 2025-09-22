@@ -19,12 +19,15 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  width: 100%;
 }
 
 /* Brand Section */
 .header-brand {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  order: 1;
 }
 
 .brand-link {
@@ -58,6 +61,9 @@
 .header-nav {
   display: flex;
   align-items: center;
+  flex: 1;
+  justify-content: center;
+  order: 2;
 }
 
 .nav-list {
@@ -83,23 +89,79 @@
   transition: all 0.3s ease;
   font-weight: 500;
   font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.nav-link:hover::before {
+  left: 100%;
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .nav-link.active {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
   font-weight: 600;
+  border-left: 3px solid #fff;
+  padding-left: 17px; /* Ajuster pour compenser la bordure */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: pulse 2s infinite;
+}
+
+.nav-link.active::before {
+  display: none; /* Désactiver l'animation pour la page active */
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 /* User Menu */
 .header-user {
   position: relative;
+  flex-shrink: 0;
+  order: 3;
 }
 
 .user-menu {
@@ -230,6 +292,8 @@
   padding: 8px;
   border-radius: 6px;
   transition: background-color 0.3s ease;
+  flex-shrink: 0;
+  order: 4;
 }
 
 .mobile-menu-toggle:hover {
@@ -243,9 +307,11 @@
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(24, 0, 173, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-nav {
@@ -273,17 +339,58 @@
   transition: all 0.3s ease;
   font-weight: 500;
   margin-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(24, 0, 173, 0.1), transparent);
+  transition: left 0.4s ease;
+}
+
+.mobile-nav-link:hover::before {
+  left: 100%;
 }
 
 .mobile-nav-link:hover {
-  background: #f8f9fa;
+  background: rgba(24, 0, 173, 0.05);
   color: #1800ad;
+  padding-left: 24px;
+  transform: translateX(4px);
 }
 
 .mobile-nav-link.active {
   background: #e6f3ff;
   color: #1800ad;
   font-weight: 600;
+  border-left: 3px solid #1800ad;
+  padding-left: 13px; /* Ajuster pour compenser la bordure */
+  box-shadow: 0 2px 8px rgba(24, 0, 173, 0.1);
+  position: relative;
+}
+
+.mobile-nav-link.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  background: #1800ad;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  animation: pulse 2s infinite;
+}
+
+.mobile-nav-link.active::before {
+  display: none; /* Désactiver l'animation pour la page active */
 }
 
 .mobile-user-section {
@@ -341,6 +448,7 @@
 @media (max-width: 768px) {
   .header-container {
     padding: 0 16px;
+    justify-content: space-between;
   }
 
   .brand-title {
@@ -368,11 +476,21 @@
   .mobile-menu {
     display: block;
   }
+
+  /* Réorganiser l'ordre sur mobile */
+  .header-brand {
+    order: 1;
+  }
+
+  .mobile-menu-toggle {
+    order: 2;
+  }
 }
 
 @media (max-width: 480px) {
   .header-container {
     padding: 0 12px;
+    justify-content: space-between;
   }
 
   .brand-title {
@@ -384,9 +502,18 @@
     height: 32px;
     margin-right: 8px;
   }
+
+  /* Maintenir l'ordre sur très petit écran */
+  .header-brand {
+    order: 1;
+  }
+
+  .mobile-menu-toggle {
+    order: 2;
+  }
 }
 
-/* Animation pour le dropdown */
+/* Animations */
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -398,11 +525,6 @@
   }
 }
 
-.user-dropdown {
-  animation: slideDown 0.2s ease-out;
-}
-
-/* Animation pour le menu mobile */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -414,6 +536,86 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Animations appliquées */
+.user-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
 .mobile-menu {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Amélioration du dropdown utilisateur */
+.user-dropdown {
+  animation: fadeIn 0.2s ease-out;
+  transform-origin: top right;
+}
+
+.user-dropdown-item {
+  transition: all 0.2s ease;
+}
+
+.user-dropdown-item:hover {
+  transform: translateX(4px);
+  background: #f8f9fa;
+}
+
+.logout-item:hover {
+  background: #fff5f5;
+  transform: translateX(4px);
+}
+
+/* Animation du bouton utilisateur */
+.user-button {
+  transition: all 0.3s ease;
+}
+
+.user-button:hover {
+  transform: scale(1.05);
+}
+
+/* Animation du toggle mobile */
+.mobile-menu-toggle {
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Animation des icônes */
+.nav-link svg,
+.mobile-nav-link svg {
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover svg,
+.mobile-nav-link:hover svg {
+  transform: scale(1.1);
+}
+
+/* Animation de l'effet shimmer */
+.nav-link::before,
+.mobile-nav-link::before {
+  animation: shimmer 0.6s ease-in-out;
 }

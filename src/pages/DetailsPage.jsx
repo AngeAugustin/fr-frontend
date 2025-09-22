@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '../components/Header';
-import FeuilleMaitresseTabs from '../components/FeuilleMaitresseTabs';
-import CommentSection from '../components/CommentSection';
 import { FaHistory, FaFileAlt, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaDownload, FaChevronDown, FaChevronUp, FaFileExcel, FaArrowLeft, FaBuilding, FaHandHoldingUsd, FaCogs, FaPlay, FaStop, FaWater, FaCoins, FaBalanceScale, FaCalculator, FaDatabase, FaShieldAlt, FaExclamationTriangle, FaInfoCircle, FaChartBar, FaMoneyBillWave, FaPercent, FaSearch, FaClipboardCheck, FaChartLine, FaExchangeAlt, FaWallet, FaCashRegister } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
 import TFTCharts from '../components/TFTCharts';
@@ -47,22 +45,6 @@ const DetailsPage = () => {
     accounts: []
   });
 
-  // Fonction pour gérer la mise à jour des commentaires
-  const handleCommentUpdate = (groupName, newComment) => {
-    setReport(prevReport => {
-      if (!prevReport) return prevReport;
-      
-      return {
-        ...prevReport,
-        generated_files: prevReport.generated_files?.map(file => {
-          if (file.file_type === 'feuille_maitresse' && file.group_name === groupName) {
-            return { ...file, comment: newComment };
-          }
-          return file;
-        }) || []
-      };
-    });
-  };
 
   // Fonction pour basculer l'état d'expansion d'un fichier
   const toggleFileExpansion = (fileKey) => {
@@ -662,132 +644,6 @@ const DetailsPage = () => {
     );
   };
 
-  // Fonction pour rendre une seule feuille maîtresse avec la nouvelle structure
-  const renderSingleFeuilleMaitresse = (groupName, groupData) => {
-    // Vérifier si les données sont dans le nouveau format
-    const isNewFormat = groupData && (
-      groupData.has_two_exercices !== undefined ||
-      groupData.exercice_n ||
-      groupData.exercice_n1 ||
-      groupData.comparatif
-    );
-
-    if (isNewFormat) {
-      // Utiliser le nouveau composant avec onglets
-      const generatedFile = report?.generated_files?.find(f => f.file_type === 'feuille_maitresse' && f.group_name === groupName);
-      return (
-        <FeuilleMaitresseTabs 
-          groupName={groupName} 
-          groupData={groupData}
-          generatedFileId={generatedFile?.id}
-          comment={generatedFile?.comment}
-          onCommentUpdate={(newComment) => handleCommentUpdate(groupName, newComment)}
-        />
-      );
-    }
-
-    // Fallback pour l'ancien format (compatibilité temporaire)
-    const excelColumns = [
-      { key: 'id', label: 'ID', width: '60px' },
-      { key: 'account_number', label: 'Numéro Compte', width: '120px' },
-      { key: 'account_label', label: 'Libellé Compte', width: '200px' },
-      { key: 'account_class', label: 'Classe Compte', width: '120px' },
-      { key: 'balance', label: 'Solde', width: '120px', align: 'right', format: 'currency' },
-      { key: 'total_debit', label: 'Total Débit', width: '120px', align: 'right', format: 'currency' },
-      { key: 'total_credit', label: 'Total Crédit', width: '120px', align: 'right', format: 'currency' },
-      { key: 'entries_count', label: 'Nb Écritures', width: '100px', align: 'right' },
-      { key: 'created_at', label: 'Date Création', width: '120px' },
-      { key: 'financial_report_id', label: 'ID Rapport', width: '100px' },
-      { key: 'account_lookup_key', label: 'Clé Recherche', width: '120px' },
-      { key: 'exercice', label: 'Exercice', width: '100px' }
-    ];
-
-    // Vérifier si groupData contient des comptes détaillés dans comptes_n
-    const hasDetailedAccounts = groupData && typeof groupData === 'object' && (
-      groupData.comptes_n && Array.isArray(groupData.comptes_n) && groupData.comptes_n.length > 0
-    );
-
-    let accountsData;
-    
-    if (hasDetailedAccounts) {
-      // Utiliser les comptes détaillés du tableau comptes_n
-      accountsData = groupData.comptes_n;
-    } else {
-      // Fallback - convertir les totaux en format Excel
-      accountsData = [{
-        id: 1,
-        account_number: groupName,
-        account_label: groupName,
-        account_class: 'Groupe',
-        balance: groupData.balance || groupData.solde_n || 0,
-        total_debit: groupData.total_debit || groupData.debit_total || 0,
-        total_credit: groupData.total_credit || groupData.credit_total || 0,
-        entries_count: groupData.entries_count || groupData.nb_ecritures || 0,
-        created_at: groupData.created_at || new Date().toISOString().split('T')[0],
-        financial_report_id: groupData.financial_report_id || '-',
-        account_lookup_key: groupData.account_lookup_key || groupName,
-        exercice: groupData.exercice || new Date().getFullYear()
-      }];
-    }
-
-    return (
-      <div style={{ overflowX: 'auto', border: '1px solid #d0d0d0', borderRadius: 4, width: '100%' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, minWidth: '100%' }}>
-          <thead style={{ background: '#f0f8ff' }}>
-            <tr>
-              {excelColumns.map(col => (
-                <th key={col.key} style={{ 
-                  padding: '6px 4px', 
-                  textAlign: col.align || 'center', 
-                  borderBottom: '2px solid #1800ad', 
-                  borderRight: '1px solid #d0d0d0',
-                  fontWeight: 700,
-                  background: '#e6f3ff',
-                  color: '#1800ad',
-                  fontSize: 10,
-                  width: col.width,
-                  whiteSpace: 'nowrap'
-                }}>
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {accountsData.map((account, index) => (
-              <tr key={account.id || index} style={{ 
-                borderBottom: '1px solid #e0e0e0',
-                background: index % 2 === 0 ? '#fff' : '#fafafa'
-              }}>
-                {excelColumns.map(col => (
-                  <td key={col.key} style={{ 
-                    padding: '6px 4px', 
-                    textAlign: col.align || 'left',
-                    borderRight: '1px solid #e0e0e0',
-                    fontSize: 10,
-                    fontWeight: col.format === 'currency' ? 600 : 'normal',
-                    color: col.format === 'currency' ? '#1800ad' : '#333'
-                  }}>
-                    {col.format === 'currency' ? (
-                      account[col.key] !== undefined && account[col.key] !== null ? 
-                        new Intl.NumberFormat('fr-FR', { 
-                          style: 'currency', 
-                          currency: 'XOF',
-                          minimumFractionDigits: 0 
-                        }).format(account[col.key]) : 
-                        '-'
-                    ) : (
-                      String(account[col.key] || '-')
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
 
   // Charger les détails du rapport
   const fetchReportDetails = async () => {
@@ -1438,82 +1294,6 @@ const DetailsPage = () => {
           </div>
         )}
 
-        {/* Feuilles maîtresses */}
-        {report.feuilles_maitresses_json && Object.entries(report.feuilles_maitresses_json).map(([groupName, groupData]) => {
-          const getAccountsCount = () => {
-            if (groupData.exercice_n && Array.isArray(groupData.exercice_n)) {
-              return groupData.exercice_n.length;
-            }
-            if (groupData.comptes_n && Array.isArray(groupData.comptes_n)) {
-              return groupData.comptes_n.length;
-            }
-            return 1;
-          };
-
-          const accountsCount = getAccountsCount();
-          const hasTwoExercices = groupData.has_two_exercices;
-          const exercicesInfo = groupData.exercices ? groupData.exercices.join(' / ') : '';
-          
-          // Vérifier si les données sont dans le nouveau format
-          const isNewFormat = groupData && (
-            groupData.has_two_exercices !== undefined ||
-            groupData.exercice_n ||
-            groupData.exercice_n1 ||
-            groupData.comparatif
-          );
-          
-          return (
-            <div key={groupName} className="details-section">
-              <div 
-                className="expandable-header"
-                onClick={() => toggleFileExpansion(`feuille_${report.id}_${groupName}`)}
-              >
-                <div className="expandable-title">
-                  <FaFileExcel size={16} color="#ff9800" />
-                  <div>
-                    <h3>{groupName}</h3>
-                    <p>
-                      {accountsCount} compte{accountsCount > 1 ? 's' : ''}
-                      {hasTwoExercices && exercicesInfo && ` • Exercices ${exercicesInfo}`}
-                      {hasTwoExercices && ' • Comparatif disponible'}
-                    </p>
-                  </div>
-                </div>
-                {expandedFiles[`feuille_${report.id}_${groupName}`] ? <FaChevronUp size={14} /> : <FaChevronDown size={14} />}
-              </div>
-              
-              {expandedFiles[`feuille_${report.id}_${groupName}`] && (
-                <div className="expandable-content">
-                  {renderSingleFeuilleMaitresse(groupName, groupData)}
-                  
-                  {/* Section commentaires - seulement pour l'ancien format */}
-                  {!isNewFormat && report.generated_files?.filter(f => f.file_type === 'feuille_maitresse' && f.group_name === groupName).map(file => (
-                    <CommentSection
-                      key={file.id}
-                      generatedFileId={file.id}
-                      groupName={groupName}
-                      initialComment={file.comment}
-                      onCommentUpdate={(newComment) => handleCommentUpdate(groupName, newComment)}
-                    />
-                  ))}
-                  
-                  <div className="export-buttons">
-                    {report.generated_files?.filter(f => f.file_type === 'feuille_maitresse' && f.group_name === groupName).map(file => (
-                      <button
-                        key={file.download_url}
-                        className="export-btn feuille-btn"
-                        onClick={() => window.open(file.download_url.startsWith('http') ? file.download_url : `http://127.0.0.1:8000${file.download_url}`, '_blank')}
-                      >
-                        <FaDownload size={12} />
-                        📋 Exporter {groupName}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
 
         {/* Message d'erreur si présent */}
         {report.error_message && (
@@ -1524,6 +1304,32 @@ const DetailsPage = () => {
             </h2>
             <div className="error-content">
               {report.error_message}
+            </div>
+          </div>
+        )}
+
+        {/* Bouton pour accéder aux Feuilles Maîtresses */}
+        {report.feuilles_maitresses_json && Object.keys(report.feuilles_maitresses_json).length > 0 && (
+          <div className="details-section feuilles-redirect-section">
+            <div className="feuilles-redirect-card">
+              <div className="feuilles-redirect-content">
+                <div className="feuilles-redirect-icon">
+                  <FaFileExcel size={32} color="#ff9800" />
+                </div>
+                <div className="feuilles-redirect-text">
+                  <h3>Feuilles Maîtresses</h3>
+                  <p>
+                    Consultez les {Object.keys(report.feuilles_maitresses_json).length} feuille{Object.keys(report.feuilles_maitresses_json).length > 1 ? 's' : ''} maîtresse{Object.keys(report.feuilles_maitresses_json).length > 1 ? 's' : ''} détaillées de ce rapport
+                  </p>
+                </div>
+                <button 
+                  className="feuilles-redirect-btn"
+                  onClick={() => navigate(`/feuilles-maitresses/${reportId}`)}
+                >
+                  <FaFileExcel size={16} />
+                  Voir les Feuilles Maîtresses
+                </button>
+              </div>
             </div>
           </div>
         )}

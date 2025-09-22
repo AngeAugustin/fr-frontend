@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '../components/Header';
+import AdvancedFilters from '../components/AdvancedFilters';
+import SortControls from '../components/SortControls';
 import { FaHistory, FaFileAlt, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaTable } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
 import './HistoryPage.css';
@@ -24,25 +26,32 @@ const HistoryPage = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   // Filtres
-  const [periodStart, setPeriodStart] = useState('');
-  const [periodEnd, setPeriodEnd] = useState('');
-  const [uploadDate, setUploadDate] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState({
+    periodStart: '',
+    periodEnd: '',
+    uploadDate: '',
+    statusFilter: '',
+    searchText: '',
+    coherenceFilter: '',
+    filesGenerated: '',
+    activeQuickFilter: 'all'
+  });
   const [viewMode, setViewMode] = useState('table'); // 'table' ou 'cards'
+  const [sortBy, setSortBy] = useState('uploaded_at');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   // Fonction pour compter les résultats filtrés
   const getFilteredHistory = () => {
     return history.filter(item => {
       // Filtre période
-      const startOk = !periodStart || item.start_date >= periodStart;
-      const endOk = !periodEnd || item.end_date <= periodEnd;
+      const startOk = !filters.periodStart || item.start_date >= filters.periodStart;
+      const endOk = !filters.periodEnd || item.end_date <= filters.periodEnd;
       // Filtre date upload
-      const uploadOk = !uploadDate || item.uploaded_at.slice(0,10) === uploadDate;
+      const uploadOk = !filters.uploadDate || item.uploaded_at.slice(0,10) === filters.uploadDate;
       // Filtre statut
-      const statusOk = !statusFilter || (() => {
+      const statusOk = !filters.statusFilter || (() => {
         const status = typeof item.status === 'string' ? item.status.toLowerCase() : item.status;
-        switch (statusFilter) {
+        switch (filters.statusFilter) {
           case 'success':
             return status === 'ok' || status === 'success';
           case 'error':
@@ -53,27 +62,126 @@ const HistoryPage = () => {
             return true;
         }
       })();
+      // Filtre cohérence
+      const coherenceOk = !filters.coherenceFilter || (() => {
+        if (!item.coherence) return filters.coherenceFilter === '';
+        switch (filters.coherenceFilter) {
+          case 'coherent':
+            return item.coherence.is_coherent === true;
+          case 'incoherent':
+            return item.coherence.is_coherent === false;
+          default:
+            return true;
+        }
+      })();
+      // Filtre fichiers générés
+      const filesOk = !filters.filesGenerated || (() => {
+        const filesCount = item.generated_files ? item.generated_files.length : 0;
+        switch (filters.filesGenerated) {
+          case '0':
+            return filesCount === 0;
+          case '1-3':
+            return filesCount >= 1 && filesCount <= 3;
+          case '4+':
+            return filesCount >= 4;
+          default:
+            return true;
+        }
+      })();
       // Filtre texte
-      const search = searchText.trim().toLowerCase();
+      const search = filters.searchText.trim().toLowerCase();
       const textOk = !search ||
         item.id.toString().includes(search) ||
         (item.file && item.file.toLowerCase().includes(search)) ||
         (item.start_date && item.start_date.includes(search)) ||
         (item.end_date && item.end_date.includes(search));
-      return startOk && endOk && uploadOk && statusOk && textOk;
+      return startOk && endOk && uploadOk && statusOk && coherenceOk && filesOk && textOk;
     });
   };
 
-  const filteredHistory = getFilteredHistory();
-  const hasActiveFilters = periodStart || periodEnd || uploadDate || statusFilter || searchText.trim();
+  const filteredHistory = getFilteredHistory().sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'uploaded_at':
+        aValue = new Date(a.uploaded_at);
+        bValue = new Date(b.uploaded_at);
+        break;
+      case 'start_date':
+        aValue = new Date(a.start_date);
+        bValue = new Date(b.start_date);
+        break;
+      case 'end_date':
+        aValue = new Date(a.end_date);
+        bValue = new Date(b.end_date);
+        break;
+      case 'status':
+        aValue = a.status || '';
+        bValue = b.status || '';
+        break;
+      case 'file_size':
+        aValue = a.file_size || 0;
+        bValue = b.file_size || 0;
+        break;
+      case 'id':
+        aValue = a.id;
+        bValue = b.id;
+        break;
+      default:
+        aValue = a.uploaded_at;
+        bValue = b.uploaded_at;
+    }
+
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const hasActiveFilters = Object.values(filters).some(value => 
+    value !== '' && value !== null && value !== undefined && value !== 'all'
+  );
+
+  // Fonction pour mettre à jour les filtres
+  const handleFiltersChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+  };
 
   // Fonction pour réinitialiser tous les filtres
   const resetFilters = () => {
-    setPeriodStart('');
-    setPeriodEnd('');
-    setUploadDate('');
-    setStatusFilter('');
-    setSearchText('');
+    setFilters({
+      periodStart: '',
+      periodEnd: '',
+      uploadDate: '',
+      statusFilter: '',
+      searchText: '',
+      coherenceFilter: '',
+      filesGenerated: '',
+      activeQuickFilter: 'all'
+    });
+  };
+
+  // Fonction pour sauvegarder les filtres
+  const saveFilters = () => {
+    localStorage.setItem('historyFilters', JSON.stringify(filters));
+    toast.success('Filtres sauvegardés !');
+  };
+
+  // Fonction pour charger les filtres
+  const loadFilters = () => {
+    const savedFilters = localStorage.getItem('historyFilters');
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        setFilters(prev => ({ ...prev, ...parsed }));
+        toast.success('Filtres chargés !');
+      } catch (error) {
+        toast.error('Erreur lors du chargement des filtres');
+      }
+    } else {
+      toast.info('Aucun filtre sauvegardé');
+    }
   };
 
   // Fonction pour rendre le statut avec style
@@ -274,6 +382,16 @@ const HistoryPage = () => {
   // Chargement initial
   useEffect(() => {
     fetchHistory(1);
+    // Charger les filtres sauvegardés
+    const savedFilters = localStorage.getItem('historyFilters');
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        setFilters(prev => ({ ...prev, ...parsed }));
+      } catch (error) {
+        console.error('Erreur lors du chargement des filtres:', error);
+      }
+    }
   }, []);
 
   // Fonction pour charger une page spécifique
@@ -384,143 +502,27 @@ const HistoryPage = () => {
                     </button>
                   </div>
                 </div>
-                {hasActiveFilters && (
-                  <div className="active-filters">
-                    <span className="active-filters-label">Filtres actifs :</span>
-                    <div className="active-filters-list">
-                      {periodStart && (
-                        <span className="filter-badge">
-                          Début: {new Date(periodStart).toLocaleDateString('fr-FR')}
-                          <button onClick={() => setPeriodStart('')} className="filter-badge-remove">×</button>
-                        </span>
-                      )}
-                      {periodEnd && (
-                        <span className="filter-badge">
-                          Fin: {new Date(periodEnd).toLocaleDateString('fr-FR')}
-                          <button onClick={() => setPeriodEnd('')} className="filter-badge-remove">×</button>
-                        </span>
-                      )}
-                      {uploadDate && (
-                        <span className="filter-badge">
-                          Upload: {new Date(uploadDate).toLocaleDateString('fr-FR')}
-                          <button onClick={() => setUploadDate('')} className="filter-badge-remove">×</button>
-                        </span>
-                      )}
-                      {statusFilter && (
-                        <span className="filter-badge">
-                          Statut: {statusFilter === 'success' ? 'Succès' : statusFilter === 'error' ? 'Erreur' : statusFilter === 'pending' ? 'En attente' : statusFilter}
-                          <button onClick={() => setStatusFilter('')} className="filter-badge-remove">×</button>
-                        </span>
-                      )}
-                      {searchText.trim() && (
-                        <span className="filter-badge">
-                          Recherche: "{searchText}"
-                          <button onClick={() => setSearchText('')} className="filter-badge-remove">×</button>
-                        </span>
-                      )}
-                    </div>
-                    <button onClick={resetFilters} className="reset-filters-btn">
-                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                        <path d="M4 12a8 8 0 0 1 8-8V2l4 4-4 4V8a6 6 0 1 0 6 6h2a8 8 0 0 1-16 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                      Réinitialiser
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Barre de recherche et filtres sur une seule ligne */}
-            <div className="history-filters">
-              {/* Champ de recherche */}
-              <div className="filter-group">
-                <label className="filter-label" htmlFor="search-input">Rechercher</label>
-                <div className="filter-input-wrapper">
-                  <span className="filter-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke="#888" strokeWidth="2"/><path d="M20 20l-4-4" stroke="#888" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </span>
-                  <input
-                    id="search-input"
-                    className="filter-input"
-                    type="text"
-                    value={searchText}
-                    onChange={e => setSearchText(e.target.value)}
-                    placeholder="Rechercher par ID, fichier, période..."
-                  />
-                </div>
-              </div>
-              {/* Champ période début */}
-              <div className="filter-group">
-                <label className="filter-label" htmlFor="period-start">Date de début</label>
-                <div className="filter-input-wrapper">
-                  <span className="filter-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#888" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#888" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </span>
-                  <input
-                    id="period-start"
-                    className="filter-input filter-date-input"
-                    type="date"
-                    value={periodStart}
-                    onChange={e => setPeriodStart(e.target.value)}
-                    placeholder="jj/mm/aaaa"
-                  />
-                </div>
-              </div>
-              {/* Champ période fin */}
-              <div className="filter-group">
-                <label className="filter-label" htmlFor="period-end">Date de fin</label>
-                <div className="filter-input-wrapper">
-                  <span className="filter-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#888" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#888" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </span>
-                  <input
-                    id="period-end"
-                    className="filter-input filter-date-input"
-                    type="date"
-                    value={periodEnd}
-                    onChange={e => setPeriodEnd(e.target.value)}
-                    placeholder="jj/mm/aaaa"
-                  />
-                </div>
-              </div>
-              {/* Champ date d'upload */}
-              <div className="filter-group">
-                <label className="filter-label" htmlFor="upload-date">Date d’upload</label>
-                <div className="filter-input-wrapper">
-                  <span className="filter-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" stroke="#888" strokeWidth="2"/><path d="M16 3v4M8 3v4" stroke="#888" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </span>
-                  <input
-                    id="upload-date"
-                    className="filter-input filter-date-input"
-                    type="date"
-                    value={uploadDate}
-                    onChange={e => setUploadDate(e.target.value)}
-                    placeholder="jj/mm/aaaa"
-                  />
-                </div>
-              </div>
-              {/* Champ statut */}
-              <div className="filter-group">
-                <label className="filter-label" htmlFor="status-filter">Statut</label>
-                <div className="filter-input-wrapper">
-                  <span className="filter-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#888" strokeWidth="2"/><path d="M12 6v6l4 2" stroke="#888" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </span>
-                  <select
-                    id="status-filter"
-                    className="filter-select"
-                    value={statusFilter}
-                    onChange={e => setStatusFilter(e.target.value)}
-                  >
-                    <option value="">Tous</option>
-                    <option value="success">Succès</option>
-                    <option value="error">Erreur</option>
-                    <option value="pending">En attente</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            {/* Filtres avancés */}
+            <AdvancedFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onReset={resetFilters}
+              onSave={saveFilters}
+              onLoad={loadFilters}
+              totalResults={totalItems}
+              filteredResults={filteredHistory.length}
+            />
+
+            {/* Contrôles de tri */}
+            <SortControls
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={setSortBy}
+              onOrderChange={setSortOrder}
+            />
 
             {/* Affichage des données filtrées */}
             {history.length === 0 ? (

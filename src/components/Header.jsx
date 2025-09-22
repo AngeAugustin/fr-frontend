@@ -79,7 +79,7 @@ const Header = () => {
                 </div>
                 <div className="dropdown-divider"></div>
                 <button 
-                  className="dropdown-item logout-item"
+                  className="dropdown-item user-dropdown-item logout-item"
                   onClick={handleLogout}
                 >
                   <FaSignOutAlt size={16} />

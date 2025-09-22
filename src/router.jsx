@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage';
 import ProtectedPage from './pages/ProtectedPage';
 import HistoryPage from './pages/HistoryPage';
 import DetailsPage from './pages/DetailsPage';
+import FeuillesMaitressePage from './pages/FeuillesMaitressePage';
 
 const Router = () => (
   <BrowserRouter>
@@ -15,6 +16,7 @@ const Router = () => (
       <Route path="/protected" element={<ProtectedPage />} />
       <Route path="/history" element={<HistoryPage />} />
       <Route path="/details/:reportId" element={<DetailsPage />} />
+      <Route path="/feuilles-maitresses/:reportId" element={<FeuillesMaitressePage />} />
     </Routes>
   </BrowserRouter>
 );

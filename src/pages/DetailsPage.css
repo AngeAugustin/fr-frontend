@@ -2314,3 +2314,109 @@
     justify-content: center;
   }
 }
+
+/* Styles pour la section de redirection vers les Feuilles Maîtresses */
+.feuilles-redirect-section {
+  margin-top: 32px;
+}
+
+.feuilles-redirect-card {
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+  border: 2px solid #ff9800;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.feuilles-redirect-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.25);
+  border-color: #f57c00;
+}
+
+.feuilles-redirect-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.feuilles-redirect-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 152, 0, 0.1);
+  border-radius: 12px;
+  border: 2px solid rgba(255, 152, 0, 0.2);
+}
+
+.feuilles-redirect-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.feuilles-redirect-text h3 {
+  margin: 0 0 8px 0;
+  color: #e65100;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.feuilles-redirect-text p {
+  margin: 0;
+  color: #bf360c;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.feuilles-redirect-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.feuilles-redirect-btn:hover {
+  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.feuilles-redirect-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+/* Responsive pour la section de redirection */
+@media (max-width: 768px) {
+  .feuilles-redirect-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  
+  .feuilles-redirect-text {
+    min-width: auto;
+  }
+  
+  .feuilles-redirect-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
