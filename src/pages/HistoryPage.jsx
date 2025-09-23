@@ -421,9 +421,10 @@ const HistoryPage = () => {
     <div className="page-container">
       <Header />
       <main className="main-content">
-        <ToastContainer position="top-right" autoClose={4000} />
-        <h1 className="generate-title">Historique des uploads</h1>
-        <p className="generate-subtitle">Consultez l'historique des uploads de fichiers CSV et des rapports générés.</p>
+        <div className="history-container">
+          <ToastContainer position="top-right" autoClose={4000} />
+          <h1 className="generate-title">Historique des traitements</h1>
+          <p className="generate-subtitle">Consultez l'historique des traitements.</p>
         {loading && (
           <div style={{ 
             display: 'flex', 
@@ -735,19 +736,20 @@ const HistoryPage = () => {
           </div>
         )}
 
-      {/* Section Informations importantes en bas */}
-      <section className="info-section">
-        <strong style={{ fontSize: '1.1rem', color: '#333' }}>Informations importantes</strong>
-        <div className="info-badges">
-          <span className="info-badge">Format CSV requis</span>
-          <span className="info-badge info-badge-success">Validation automatique</span>
-          <span className="info-badge info-badge-warning">Conforme SYSCOHADA</span>
-          <span className="info-badge info-badge-error">Export Excel</span>
+          {/* Section Informations importantes en bas */}
+          <section className="info-section">
+            <strong style={{ fontSize: '1.1rem', color: '#333' }}>Informations importantes</strong>
+            <div className="info-badges">
+              <span className="info-badge">Format CSV requis</span>
+              <span className="info-badge info-badge-success">Validation automatique</span>
+              <span className="info-badge info-badge-warning">Conforme SYSCOHADA</span>
+              <span className="info-badge info-badge-error">Export Excel</span>
+            </div>
+            <div style={{ marginTop: 16, color: '#555', fontSize: 14, lineHeight: 1.6 }}>
+              Le système traite automatiquement votre balance générale et génère un TFT complet avec toutes les rubriques SYSCOHADA. Les contrôles de cohérence sont effectués automatiquement et les fichiers d'export sont disponibles immédiatement.
+            </div>
+          </section>
         </div>
-        <div style={{ marginTop: 16, color: '#555', fontSize: 14, lineHeight: 1.6 }}>
-          Le système traite automatiquement votre balance générale et génère un TFT complet avec toutes les rubriques SYSCOHADA. Les contrôles de cohérence sont effectués automatiquement et les fichiers d'export sont disponibles immédiatement.
-        </div>
-      </section>
       </main>
     </div>
   );

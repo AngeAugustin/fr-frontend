@@ -750,6 +750,13 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Conteneur principal centré */
+.history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
 /* Titre et sous-titre - Cohérence avec GeneratePage */
 .generate-title {
   color: #1800ad;
@@ -834,7 +841,8 @@
 /* Responsive */
 @media (max-width: 1200px) {
   .history-container {
-    max-width: none;
+    max-width: 100%;
+    padding: 0 16px;
   }
 }
 
